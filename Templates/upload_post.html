@@ -1,0 +1,19 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'upload_post.css' %}">
+
+<div class="upload-container mt-5">
+    <div class="upload-card">
+        <h2>Upload a New Post</h2>
+        <form method="post" enctype="multipart/form-data" action="{% url 'upload_post' %}">
+            {% csrf_token %}
+            <label for="image_post">Select Image:</label>
+            <input type="file" id="image_post" name="image" required>
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,394 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Reset and base styles (unchanged) */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    main {
+        flex-grow: 1;
+        max-width: 600px;
+        margin: 16px auto 40px;
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 8px 20px rgb(29 161 242 / 0.15);
+        overflow: hidden;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f8fa;
+        color: #333;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    nav {
+        background:rgb(250, 245, 245);
+        padding: 0 16px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgb(245, 243, 243);
+        color: #f2481d;
+    }
+    /* ... (keep all your existing styles) ... */
+
+    /* === NEW STYLES FOR EDIT FEATURE === */
+    .edit-btn {
+        background: #1da1f2;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 16px;
+        margin-top: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    .edit-btn:hover {
+        background: #0d8bd9;
+    }
+    .edit-field {
+        width: 80%;
+        margin: 8px auto;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        display: block;
+        font-family: inherit;
+        font-size: 0.95rem;
+    }
+    #edit-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    #edit-actions button {
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+    #save-profile-btn {
+        background: #1da1f2;
+        color: white;
+    }
+    #save-profile-btn:hover {
+        opacity: 0.9;
+    }
+    #cancel-edit-btn {
+        background: #f5f8fa;
+        color: #333;
+        border: 1px solid #ddd !important;
+    }
+    #cancel-edit-btn:hover {
+        opacity: 0.8;
+    }
+    .avatar-edit-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    .avatar-edit-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+        cursor: pointer;
+    }
+    .avatar-edit-overlay:hover {
+        opacity: 1;
+    }
+    .avatar-edit-overlay span {
+        color: white;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+    #avatar-upload {
+        display: none;
+    }
+</style>
+
+<main>
+    <section class="profile-header" aria-label="User Profile Header">
+        <div class="avatar-edit-wrapper">
+            <div class="profile-avatar">
+                <img src="{{ profile_user.profile.avatar.url }}"
+                     alt="{{ profile_user.username }}'s avatar"
+                     onerror="this.src='{% static 'avatar/default.jpg' %}'">
+                {% if is_own_profile %}
+                <div class="avatar-edit-overlay" id="avatar-edit-trigger">
+                    <span>Change<br>Photo</span>
+                </div>
+                <input type="file" id="avatar-upload" accept="image/*">
+                {% endif %}
+            </div>
+        </div>
+        
+        <h1>{{ profile_user.username }}</h1>
+        <div class="profile-stats">
+            <span>{{ profile_user.profile.post_count }} posts</span>
+            <span>{{ profile_user.profile.followers_count }} followers</span>
+            <span>{{ profile_user.profile.following_count }} following</span>
+        </div>
+
+        <!-- Bio Section (Static + Editable) -->
+        <p class="profile-bio" id="bio-text">{{ profile_user.profile.bio|default:"No bio yet" }}</p>
+        <textarea id="bio-edit" class="edit-field" style="display: none;" 
+                  placeholder="Tell people about yourself...">{{ profile_user.profile.bio|default:"" }}</textarea>
+
+        <!-- Location Section (Static + Editable) -->
+        <p class="profile-location" id="location-text">
+            {{ profile_user.profile.location|default:"No location set" }}
+        </p>
+        <input type="text" id="location-edit" class="edit-field" style="display: none;" 
+               value="{{ profile_user.profile.location|default:'' }}" placeholder="Add location">
+
+        {% if is_own_profile %}
+            <button id="edit-profile-btn" class="edit-btn">Edit Profile</button>
+            <div id="edit-actions" style="display: none;">
+                <button id="save-profile-btn">Save Changes</button>
+                <button id="cancel-edit-btn">Cancel</button>
+            </div>
+        {% else %}
+            <button class="follow-btn" data-username="{{ profile_user.username }}">
+                {% if request.user in profile_user.profile.followers.all %}Unfollow{% else %}Follow{% endif %}
+            </button>
+        {% endif %}
+    </section>
+
+    <!-- Posts Section (unchanged) -->
+    <section class="profile-posts" aria-label="User posts">
+        {% for post in posts %}
+            <div class="post" tabindex="0" aria-label="View post {{ forloop.counter }}">
+                <img src="{{ post.image.url }}" alt="Post by {{ post.user.username }}">
+                <div class="post-overlay">
+                    <span><i class="like-icon"></i> {{ post.likes.count }}</span>
+                </div>
+                {% if is_own_profile %}
+                    <div class="post-options">
+                        <button class="three-dots-btn" aria-label="Post options">&#8230;</button>
+                        <div class="options-dropdown">
+                            <button class="delete-option" data-post-id="{{ post.id }}">Delete</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p class="no-posts">No posts yet</p>
+        {% endfor %}
+    </section>
+</main>
+
+<footer>
+    &copy; 2024 SocialMe. All rights reserved.
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Follow Button Logic (unchanged) ---
+    const followBtn = document.querySelector('.follow-btn');
+    if (followBtn) {
+        followBtn.addEventListener('click', async function() {
+            const username = this.dataset.username;
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>';
+
+            try {
+                const response = await fetch(`/follow/${username}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    btn.textContent = data.action === 'follow' ? 'Unfollow' : 'Follow';
+                    const stats = document.querySelectorAll('.profile-stats span');
+                    if (stats.length >= 2) {
+                        stats[1].textContent = `${data.followers_count} followers`;
+                    }
+                } else {
+                    alert(data.error || 'An error occurred');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error occurred');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = btn.textContent;
+            }
+        });
+    }
+
+    // --- Post Options Logic (unchanged) ---
+    document.querySelectorAll('.three-dots-btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const dropdown = this.nextElementSibling;
+            document.querySelectorAll('.options-dropdown.show').forEach(openDropdown => {
+                if (openDropdown !== dropdown) openDropdown.classList.remove('show');
+            });
+            dropdown.classList.toggle('show');
+            event.stopPropagation();
+        });
+    });
+
+    document.addEventListener('click', function(event) {
+        document.querySelectorAll('.options-dropdown.show').forEach(dropdown => {
+            if (!dropdown.contains(event.target) && !event.target.classList.contains('three-dots-btn')) {
+                dropdown.classList.remove('show');
+            }
+        });
+    });
+
+    document.querySelectorAll('.delete-option').forEach(button => {
+        button.addEventListener('click', async function() {
+            const postId = this.dataset.postId;
+            if (confirm('Are you sure you want to delete this post?')) {
+                try {
+                    const response = await fetch(`/posts/${postId}/delete/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        this.closest('.post').remove();
+                        const postCountSpan = document.querySelector('.profile-stats span:first-child');
+                        if (postCountSpan) {
+                            let currentCount = parseInt(postCountSpan.textContent.split(' ')[0]);
+                            postCountSpan.textContent = `${currentCount - 1} posts`;
+                        }
+                    } else {
+                        alert(data.error || 'Failed to delete post.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Network error during deletion.');
+                }
+            }
+        });
+    });
+
+    // === NEW PROFILE EDIT FUNCTIONALITY ===
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', function() {
+            // Show editable fields
+            document.getElementById('bio-text').style.display = 'none';
+            document.getElementById('bio-edit').style.display = 'block';
+            document.getElementById('location-text').style.display = 'none';
+            document.getElementById('location-edit').style.display = 'block';
+            document.getElementById('edit-actions').style.display = 'flex';
+            this.style.display = 'none';
+        });
+    }
+
+    // Cancel edit
+    document.getElementById('cancel-edit-btn')?.addEventListener('click', function() {
+        resetEditMode();
+    });
+
+    // Save changes
+    document.getElementById('save-profile-btn')?.addEventListener('click', async function() {
+        const bio = document.getElementById('bio-edit').value;
+        const location = document.getElementById('location-edit').value;
+        const btn = this;
+        
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        try {
+            const response = await fetch('/edit_profile/', {  // Update with your URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ 
+                    bio: bio,
+                    location: location 
+                })
+            });
+
+            if (response.ok) {
+                // Update UI
+                document.getElementById('bio-text').textContent = bio || "No bio yet";
+                document.getElementById('location-text').textContent = location || "No location set";
+                resetEditMode();
+            } else {
+                const error = await response.json();
+                alert(error.message || 'Failed to save changes.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Network error occurred');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Save Changes';
+        }
+    });
+
+    // Avatar upload
+    document.getElementById('avatar-edit-trigger')?.addEventListener('click', function() {
+        document.getElementById('avatar-upload').click();
+    });
+
+    document.getElementById('avatar-upload')?.addEventListener('change', async function(e) {
+        if (e.target.files.length > 0) {
+            const formData = new FormData();
+            formData.append('avatar', e.target.files[0]);
+
+            try {
+                const response = await fetch('/update_avatar/', {  // Update with your URL
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.querySelector('.profile-avatar img').src = data.avatar_url + '?t=' + new Date().getTime();
+                } else {
+                    alert('Failed to update avatar.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error occurred');
+            }
+        }
+    });
+
+    function resetEditMode() {
+        document.getElementById('bio-text').style.display = 'block';
+        document.getElementById('bio-edit').style.display = 'none';
+        document.getElementById('location-text').style.display = 'block';
+        document.getElementById('location-edit').style.display = 'none';
+        document.getElementById('edit-actions').style.display = 'none';
+        document.getElementById('edit-profile-btn').style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

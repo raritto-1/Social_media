@@ -1,0 +1,156 @@
+/* Container */
+.profile-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+}
+
+/* Header section */
+.profile-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 1.5rem;
+}
+
+.profile-avatar img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #aaa;
+}
+
+.profile-info h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin: 1rem 0;
+    font-weight: 500;
+    color: #555;
+}
+
+.profile-bio, .profile-location {
+    margin: 0.25rem 0;
+    font-size: 15px;
+    color: #666;
+}
+
+/* Buttons */
+.follow-btn,
+.edit-profile-btn,
+.upload-card button {
+    padding: 0.5rem 1rem;
+    background-color: #3897f0;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease-in-out;
+}
+
+.follow-btn:hover,
+.edit-profile-btn:hover,
+.upload-card button:hover {
+    background-color: #2174c8;
+}
+
+/* Upload section */
+.upload-container {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.upload-card {
+    background: #f5f5f5;
+    padding: 1.5rem 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+}
+
+.upload-card h2 {
+    margin-bottom: 1rem;
+    font-size: 22px;
+    text-align: center;
+}
+
+.upload-card label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.upload-card input[type="file"] {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Post grid */
+.profile-posts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.profile-posts .post {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+}
+
+.profile-posts .post img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+/* Hover overlay */
+.post-overlay {
+    position: absolute;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    width: 100%;
+    padding: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Spinner (for follow button) */
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-top: 2px solid #3897f0;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* No posts message */
+.no-posts {
+    text-align: center;
+    color: #777;
+    font-style: italic;
+    margin-top: 2rem;
+}

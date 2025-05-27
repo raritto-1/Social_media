@@ -1,0 +1,1 @@
+posts = Post.objects.filter(user=user_obj).order_by('-id') 

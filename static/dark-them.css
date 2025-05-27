@@ -1,0 +1,56 @@
+/* Dark theme styles */
+body {
+    background-color: #121212;  /* Dark background */
+    color: #e0e0e0;  /* Light text color */
+}
+
+.card {
+    background-color: #1f1f1f;  /* Dark card background */
+    color: #e0e0e0;  /* Light text color */
+}
+
+.card-body {
+    background-color: #1f1f1f;  /* Dark card body */
+}
+
+.btn-primary {
+    background-color: #6200ea;  /* Purple button */
+    border-color: #6200ea;  /* Button border */
+}
+
+.btn-primary:hover {
+    background-color: #3700b3;  /* Darker purple for hover */
+    border-color: #3700b3;  /* Button border */
+}
+
+.form-control {
+    background-color: #333;  /* Dark input fields */
+    color: #e0e0e0;  /* Light text in inputs */
+    border-color: #444;  /* Border color for inputs */
+}
+
+.form-control:focus {
+    background-color: #333;  /* Dark input fields on focus */
+    border-color: #6200ea;  /* Focus border color */
+}
+
+.alert-success {
+    background-color: #388e3c;  /* Green alert background */
+    color: #e0e0e0;  /* Light text */
+}
+
+.alert {
+    border-radius: 8px;  /* Rounded corners for alerts */
+}
+
+.text-center {
+    color: #e0e0e0;  /* Light text color for centered text */
+}
+
+a {
+    color: #bb86fc;  /* Light purple links */
+}
+
+a:hover {
+    color: #6200ea;  /* Darker purple on hover */
+}

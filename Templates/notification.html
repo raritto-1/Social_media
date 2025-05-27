@@ -1,0 +1,34 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<style>
+    .list-group-item.bg-light {
+        font-weight: bold;
+    }
+</style>
+
+
+<div class="container mt-4">
+  <h2>Notifications</h2>
+  <ul class="list-group">
+    {% for notification in notifications %}
+      <li class="list-group-item {% if not notification.is_read %}bg-light{% endif %}">
+        {{ notification.get_message }}
+        <form action="{% url 'mark_notification_read' notification.pk %}" method="post" class="float-right ml-2">
+          {% csrf_token %}
+          {% if not notification.is_read %}
+            <button class="btn btn-sm btn-primary">Mark as read</button>
+          {% else %}
+            <button class="btn btn-sm btn-secondary" disabled>Read</button>
+          {% endif %}
+        </form>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No notifications yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
+
+

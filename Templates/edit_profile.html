@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialMe - Home</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'stylesheet.css' %}">
+    <style>
+        /* MAIN LAYOUT */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* STORIES/CAROUSEL */
+        .stories-container {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+        }
+        .stories-container::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+        .story {
+            flex: 0 0 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        .story-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            padding: 3px;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        }
+        .story-username {
+            font-size: 12px;
+            margin-top: 5px;
+            text-align: center;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* POSTS FEED */
+        .feed {
+            margin-top: 30px;
+        }
+        .post {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border: 1px solid #eee;
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+        }
+        .post-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        .post-user {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .post-more {
+            margin-left: auto;
+            cursor: pointer;
+        }
+        .post-image-container {
+            width: 100%;
+            position: relative;
+        }
+        .post-image {
+            width: 100%;
+            max-height: 600px;
+            object-fit: contain;
+            background: #fafafa;
+        }
+        .post-actions {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+        }
+        .post-action {
+            margin-right: 15px;
+            cursor: pointer;
+            font-size: 24px;
+        }
+        .post-action.save {
+            margin-left: auto;
+            margin-right: 0;
+        }
+        .post-likes {
+            font-weight: 600;
+            font-size: 14px;
+            padding: 0 15px;
+            margin-bottom: 5px;
+        }
+        .post-caption {
+            padding: 0 15px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .post-caption .username {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        .post-comments {
+            padding: 0 15px;
+            color: #8e8e8e;
+            font-size: 14px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .post-time {
+            padding: 0 15px 10px;
+            color: #8e8e8e;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .comment-input {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-top: 1px solid #efefef;
+        }
+        .comment-input input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+        .comment-input button {
+            color: #0095f6;
+            font-weight: 600;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0;
+            }
+            .post {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <!-- Your existing nav code -->
+    </nav>
+
+    {% block content %}
+    <main class="container">
+        {% if request.user.is_authenticated %}
+            <!-- Stories Carousel -->
+            <div class="stories-container">
+                {% for user in suggested_users %}
+                <div class="story">
+                    <img src="{{ user.profile.avatar.url }}" class="story-avatar" alt="{{ user.username }}">
+                    <div class="story-username">{{ user.username }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Posts Feed -->
+            <div class="feed">
+                {% for post in posts %}
+                <div class="post">
+                    <!-- Post Header -->
+                    <div class="post-header">
+                        <img src="{{ post.user.profile.avatar.url }}" class="post-avatar" alt="{{ post.user.username }}">
+                        <div class="post-user">{{ post.user.username }}</div>
+                        <div class="post-more">⋯</div>
+                    </div>
+
+                    <!-- Post Image -->
+                    <div class="post-image-container">
+                        <img src="{{ post.image.url }}" class="post-image" alt="Post by {{ post.user.username }}">
+                    </div>
+
+                    <!-- Post Actions -->
+                    <div class="post-actions">
+                        <div class="post-action like">♥</div>
+                        <div class="post-action comment">💬</div>
+                        <div class="post-action share">✈</div>
+                        <div class="post-action save">🔖</div>
+                    </div>
+
+                    <!-- Post Details -->
+                    <div class="post-likes">{{ post.likes.count }} likes</div>
+                    <div class="post-caption">
+                        <span class="username">{{ post.user.username }}</span>
+                        <span>{{ post.caption }}</span>
+                    </div>
+                    {% if post.comments.count > 0 %}
+                    <div class="post-comments">View all {{ post.comments.count }} comments</div>
+                    {% endif %}
+                    <div class="post-time">{{ post.created_at|timesince }} ago</div>
+
+                    <!-- Comment Input -->
+                    <div class="comment-input">
+                        <input type="text" placeholder="Add a comment...">
+                        <button>Post</button>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No posts available. Follow users to see their posts.</p>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="welcome-message">
+                <h2>Welcome to SocialMe!</h2>
+                <p>Please <a href="{% url 'login' %}">login</a> or <a href="{% url 'register' %}">register</a> to access all features.</p>
+            </div>
+        {% endif %}
+    </main>
+    {% endblock %}
+
+    <script>
+        // Like functionality
+        document.querySelectorAll('.post-action.like').forEach(button => {
+            button.addEventListener('click', function() {
+                this.classList.toggle('active');
+                // Here you would typically send an AJAX request to your backend
+            });
+        });
+
+        // Comment submission
+        document.querySelectorAll('.comment-input button').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                if (input.value.trim() !== '') {
+                    // Here you would send the comment to your backend
+                    console.log('Comment:', input.value);
+                    input.value = '';
+                }
+            });
+        });
+
+        // Press Enter to submit comment
+        document.querySelectorAll('.comment-input input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    this.nextElementSibling.click();
+                }
+            });
+        });
+
+        // Your existing dropdown and hamburger menu scripts
+        document.querySelector('.hamburger')?.addEventListener('click', function() {
+            const navLinks = document.querySelector('.nav-links');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            navLinks.style.display = isExpanded ? 'none' : 'flex';
+            this.setAttribute('aria-expanded', !isExpanded);
+        });
+
+        const userAvatar = document.querySelector('.user-avatar');
+        const dropdown = document.querySelector('.dropdown');
+        
+        if (userAvatar && dropdown) {
+            userAvatar.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                dropdown.classList.toggle('show', !isExpanded);
+                this.setAttribute('aria-expanded', !isExpanded);
+            });
+            
+            document.addEventListener('click', function() {
+                dropdown.classList.remove('show');
+                userAvatar.setAttribute('aria-expanded', 'false');
+            });
+            
+            dropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    </script>
+</body>
+</html>

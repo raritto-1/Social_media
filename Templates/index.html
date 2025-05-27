@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialMedia</title>
+    {% load static %}
+    {% comment %} <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> {% endcomment %}
+    <link rel="stylesheet" href="{% static 'stylesheet.css' %}">
+        <style>
+        /* MAIN LAYOUT */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* STORIES/CAROUSEL */
+        .stories-container {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+        }
+        .stories-container::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+        .story {
+            flex: 0 0 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        .story-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            padding: 3px;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        }
+        .story-username {
+            font-size: 12px;
+            margin-top: 5px;
+            text-align: center;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* POSTS FEED */
+        .feed {
+            margin-top: 30px;
+        }
+        .post {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border: 1px solid #eee;
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+        }
+        .post-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        .post-user {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .post-more {
+            margin-left: auto;
+            cursor: pointer;
+        }
+        .post-image-container {
+            width: 100%;
+            position: relative;
+        }
+        .post-image {
+            width: 100%;
+            max-height: 600px;
+            object-fit: contain;
+            background: #fafafa;
+        }
+        .post-actions {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+        }
+        .post-action {
+            margin-right: 15px;
+            cursor: pointer;
+            font-size: 24px;
+        }
+        .post-action.save {
+            margin-left: auto;
+            margin-right: 0;
+        }
+        .post-likes {
+            font-weight: 600;
+            font-size: 14px;
+            padding: 0 15px;
+            margin-bottom: 5px;
+        }
+        .post-caption {
+            padding: 0 15px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .post-caption .username {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        .post-comments {
+            padding: 0 15px;
+            color: #8e8e8e;
+            font-size: 14px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .post-time {
+            padding: 0 15px 10px;
+            color: #8e8e8e;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .comment-input {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-top: 1px solid #efefef;
+        }
+        .comment-input input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+        .comment-input button {
+            color: #0095f6;
+            font-weight: 600;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0;
+            }
+            .post {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+          .user-menu {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .dropdown a {
+    color: #222;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .dropdown a:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .dropdown.show {
+    display: block;
+  }
+  
+  .user-avatar {
+    cursor: pointer;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+  }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand" tabindex="0" aria-label="Social Media Home">SocialMe</div>
+
+        <button class="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+            <span></span><span></span><span></span>
+        </button>
+
+        <div class="nav-links" role="menubar">
+            {% if request.user.is_authenticated %}
+                <a href="{% url 'main' %}" role="menuitem" aria-label="Home">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 12l9-9 9 9v9a3 3 0 01-3 3h-4a1 1 0 01-1-1v-5H8v5a1 1 0 01-1 1H3a3 3 0 01-3-3v-9z" fill="currentColor"/>
+                    </svg>
+                </a>
+                <a href="{% url 'profile_view' %}" aria-label="Profile" role="menuitem">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="7" r="5" fill="currentColor"/>
+                        <path d="M2 21c0-4 8-4 10-4s10 0 10 4v1H2v-1z" fill="currentColor" opacity="0.6"/>
+                    </svg>
+                </a>
+                <a href="{% url 'upload_post' %}" role="menuitem" aria-label="Create Post">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                </a>
+                <a href="{% url 'notifications'%}" role="menuitem" aria-label="Notifications">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 16v-5a6 6 0 00-12 0v5l-2 2v1h16v-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M13.73 21a2 2 0 01-3.46 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            {% endif %}
+        </div>
+
+        {% if request.user.is_authenticated %}
+        <div class="search-container" role="search">
+            <input type="search" placeholder="Search" aria-label="Search social media" autocomplete="off">
+            <svg class="search-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 21l-4.35-4.35m0 0a7.5 7.5 0 1 0-10.61-10.61 7.5 7.5 0 0 0 10.61 10.61z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+        </div>
+        {% endif %}
+
+            <div class="user-section">
+            {% if request.user.is_authenticated %}
+                <div class="user-menu">
+                <img src="{{ request.user.profile.avatar.url }}"
+                    alt="User Avatar"
+                    class="user-avatar"
+                    tabindex="0"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="user-dropdown">
+                    <div class="dropdown" id="user-dropdown" role="menu">
+                        <a href="{% url 'profile_view' %}" role="menuitem">
+                            <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="7" r="5" fill="currentColor"/>
+                                <path d="M2 21c0-4 8-4 10-4s10 0 10 4v1H2v-1z" fill="currentColor" opacity="0.6"/>
+                            </svg>
+                            Profile
+                        </a>
+                        <a href="#" role="menuitem">
+                            <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" fill="currentColor"/>
+                                <path d="M19.4 13.2l1.4-2.4-2.9-5-2.9 1a7.6 7.6 0 00-3.1 0l-2.9-1-2.9 5 1.4 2.4a7.8 7.8 0 000 5l-1.4 2.4 2.9 5 2.9-1a7.6 7.6 0 003.1 0l2.9 1 2.9-5-1.4-2.4a7.8 7.8 0 000-5z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Settings
+                        </a>
+                        <a href="{% url 'logout' %}" role="menuitem">
+                            <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16 17l5-5-5-5M21 12H9M12 19v2a2 2 0 01-2 2H6a2 2 0 01-2-2V3a2 2 0 012-2h4a2 2 0 012 2v2" fill="none" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+
+
+            {% else %}
+                <div class="auth-buttons">
+                    <a href="{% url 'login' %}" class="login-btn" role="button">Login</a>
+                    <a href="{% url 'register' %}" class="register-btn" role="button">Register</a>
+                </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    {% block content %}
+    <main class="container">
+        {% if request.user.is_authenticated %}
+            <!-- Stories Carousel -->
+            <div class="stories-container">
+                {% for user in suggested_users %}
+                <div class="story">
+                    <img src="{{ user.profile.avatar.url }}" class="story-avatar" alt="{{ user.username }}">
+                    <div class="story-username">{{ user.username }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Posts Feed -->
+            <div class="feed">
+                {% for post in posts %}
+                <div class="post">
+                    <!-- Post Header -->
+                    <div class="post-header">
+                        <img src="{{ post.user.profile.avatar.url }}" class="post-avatar" alt="{{ post.user.username }}">
+                        <div class="post-user">{{ post.user.username }}</div>
+                        <div class="post-more">⋯</div>
+                    </div>
+
+                    <!-- Post Image -->
+                    <div class="post-image-container">
+                        <img src="{{ post.image.url }}" class="post-image" alt="Post by {{ post.user.username }}">
+                    </div>
+
+                    <!-- Post Actions -->
+                    <div class="post-actions">
+                        <div class="post-action like">♥</div>
+                        <div class="post-action comment">💬</div>
+                        <div class="post-action share">✈</div>
+                        <div class="post-action save">🔖</div>
+                    </div>
+
+                    <!-- Post Details -->
+                    <div class="post-likes">{{ post.likes.count }} likes</div>
+                    <div class="post-caption">
+                        <span class="username">{{ post.user.username }}</span>
+                        <span>{{ post.caption }}</span>
+                    </div>
+                    {% if post.comments.count > 0 %}
+                    <div class="post-comments">View all {{ post.comments.count }} comments</div>
+                    {% endif %}
+                    <div class="post-time">{{ post.created_at|timesince }} ago</div>
+
+                    <!-- Comment Input -->
+                    <div class="comment-input">
+                        <input type="text" placeholder="Add a comment...">
+                        <button>Post</button>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No posts available. Follow users to see their posts.</p>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="welcome-message">
+                <h2>Welcome to SocialMe!</h2>
+                <p>Please <a href="{% url 'login' %}">login</a> or <a href="{% url 'register' %}">register</a> to access all features.</p>
+            </div>
+        {% endif %}
+    </main>
+    {% endblock %}
+
+    <script>
+        // Like functionality
+        document.querySelectorAll('.post-action.like').forEach(button => {
+            button.addEventListener('click', function() {
+                this.classList.toggle('active');
+                // Here you would typically send an AJAX request to your backend
+            });
+        });
+
+        // Comment submission
+        document.querySelectorAll('.comment-input button').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                if (input.value.trim() !== '') {
+                    // Here you would send the comment to your backend
+                    console.log('Comment:', input.value);
+                    input.value = '';
+                }
+            });
+        });
+
+        // Press Enter to submit comment
+        document.querySelectorAll('.comment-input input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    this.nextElementSibling.click();
+                }
+            });
+        });
+
+        // Your existing dropdown and hamburger menu scripts
+        document.querySelector('.hamburger')?.addEventListener('click', function() {
+            const navLinks = document.querySelector('.nav-links');
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            navLinks.style.display = isExpanded ? 'none' : 'flex';
+            this.setAttribute('aria-expanded', !isExpanded);
+        });
+
+        const userAvatar = document.querySelector('.user-avatar');
+        const dropdown = document.querySelector('.dropdown');
+        
+        if (userAvatar && dropdown) {
+            userAvatar.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                dropdown.classList.toggle('show', !isExpanded);
+                this.setAttribute('aria-expanded', !isExpanded);
+            });
+            
+            document.addEventListener('click', function() {
+                dropdown.classList.remove('show');
+                userAvatar.setAttribute('aria-expanded', 'false');
+            });
+            
+            dropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    </script>
+</body>
+</html>
